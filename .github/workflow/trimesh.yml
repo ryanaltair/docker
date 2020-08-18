@@ -1,0 +1,25 @@
+name: build trimesh docker
+# This workflow is triggered on pushes to the repository.
+on: [push]
+
+jobs:
+  build_docker:
+    name: build docker images
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: list files
+        run: ls -lht
+      - name: echo repo
+        run: echo $GITHUB_REPOSITORY
+      - name: build images
+        run: docker build -t docker.pkg.github.com/$GITHUB_REPOSITORY/trimesh -f docker/trimesh.dockerfile .
+      - name: Docker Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: docker.pkg.github.com
+          username: $GITHUB_ACTOR
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: push images
+        run: docker push docker.pkg.github.com/$GITHUB_REPOSITORY/trimesh
